@@ -17,6 +17,6 @@ describe('home page', () => {
     cy.get('dt').eq(1).contains("25+ Lessons")
    
   })
-
+// add a coment
   
 })
