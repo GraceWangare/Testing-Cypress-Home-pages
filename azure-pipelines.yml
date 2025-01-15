@@ -1,41 +1,38 @@
-jobs:
-  # Example job that runs end-to-end tests using Cypress test runner
-  #   https://www.cypress.io/
+trigger:
+  - main # Trigger the pipeline on changes to the main branch
 
-  # Job names can contain alphanumeric characters and '_', cannot start with a number
-  - job: Cypress_e2e_tests
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '22.x'
-          displayName: 'Install Node.js'
+pool:
+  vmImage: 'ubuntu-latest' # Specify the build agent
 
-      # npm modules and Cypress binary should be cached
-      # otherwise the install will be too slow
-      # https://docs.microsoft.com/en-us/azure/devops/pipelines/caching/?view=azure-devops
-      # since the username / user home directory are not available via system variables
-      # (there is even an open question about it)
-      # https://docs.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops
-      # just use "/home/vsts" for now
-      - task: CacheBeta@1
-        inputs:
-          key: npm | $(Agent.OS) | package-lock.json
-          path: /home/vsts/.npm
-          restoreKeys: npm | $(Agent.OS) | package-lock.json
-        displayName: Cache npm packages
-      - task: CacheBeta@1
-        inputs:
-          key: cypress | $(Agent.OS) | package-lock.json
-          path: /home/vsts/.cache/Cypress
-          restoreKeys: cypress | $(Agent.OS) | package-lock.json
-        displayName: Cache Cypress binary
+steps:
+  # Step 1: Install dependencies
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '16.x' # Specify Node.js version
+    displayName: 'Install Node.js'
+  
+  - task: CacheBeta@1
+    inputs:
+      key: npm | package-lock.json
+      path: /home/vsts/.npm
+      restoreKeys: npm | package-lock.json
+  - task: CacheBeta@1
+    inputs:
+      key: cy | package-lock.json
+      path: /home/vsts/.cache/Cypress
+      restoreKeys: cy | package-lock.json
 
-      - script: npm ci
-        displayName: 'Install npm dependencies'
+  # Step 2: Install project dependencies
+  - script: npm install
+    displayName: 'Install dependencies'
 
-      - script: run test:ci
-        displayName: 'Run cypress tests'
+  # Step 3: Run Cypress tests
+  - script: run test:ci
+    displayName: 'Run Cypress tests'
 
-      
+  # Step 4: Publish test results to Azure DevOps
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/results/*.xml' # Path to the JUnit XML results
+      testRunTitle: 'Cypress Test Run'
+    displayName: 'Publish Cypress Test Results'
