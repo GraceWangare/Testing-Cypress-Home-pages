@@ -1,3 +1,5 @@
+import {faker} from "@faker-js/faker";
+
 describe('home page', () => {
 
   beforeEach(() =>{

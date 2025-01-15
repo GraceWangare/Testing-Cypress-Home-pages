@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "install": "npm ci",
-    "run test:ci": "npx cypress run",
+    "npm install": "npm ci",
+    "run test:ci": "npx cypress run --reporter junit --reporter-options'mochaFile=results/test-results-[hash].xml' ",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -31,6 +31,7 @@
     "xstate": "^4.30.5"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.3.0",
     "@types/chai": "^4.3.0",
     "@types/lodash": "^4.14.179",
     "@types/mocha": "^9.1.0",
